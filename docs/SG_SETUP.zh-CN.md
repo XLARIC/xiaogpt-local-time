@@ -31,6 +31,7 @@ Docker Hub 浏览器登录只授权本机 CLI，不能代替 GitHub 自动构建
 - 主分支提交：发布 `latest`、`sha-<commit>`。
 - 推送 `v0.1.0` 等版本标签：另发布版本标签 `0.1.0`。
 - Actions → Build and publish on SG → Run workflow：手动重试。
+- 取消勾选 `publish` 可先在 SG 构建和测试，不需要 Docker Hub 令牌，也不会上传镜像。
 - Docker Hub 仓库页面和镜像 manifest 均应存在 `linux/amd64`。
 - 发布前在 SG 运行本地时区测试、容器分流测试及启动帮助命令。
 

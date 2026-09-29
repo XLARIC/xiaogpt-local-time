@@ -5,6 +5,11 @@ on:
     branches: [main]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the verified image to Docker Hub
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -16,30 +21,36 @@ concurrency:
 jobs:
   publish:
     if: >-
-      vars.SG_PUBLISH_ENABLED == 'true' &&
       github.actor == github.repository_owner &&
-      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) &&
+      (vars.SG_PUBLISH_ENABLED == 'true' ||
+       (github.event_name == 'workflow_dispatch' && !inputs.publish))
     runs-on: [self-hosted, Linux, X64, aliyun-sg-t5]
     timeout-minutes: 30
     env:
       DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+      PUBLISH_IMAGE: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Verify SG and publishing configuration
-        env:
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Verify SG runner and Docker
         run: |
           set -euo pipefail
           test "$(id -u)" -ne 0
           test "$(uname -m)" = x86_64
           test -n "$DOCKERHUB_USERNAME"
+          docker version
+          docker info --format '{{json .SecurityOptions}}' | grep -q rootless
+      - name: Log in for publishing
+        if: env.PUBLISH_IMAGE == 'true'
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set -euo pipefail
           test -n "$DOCKERHUB_TOKEN"
           export DOCKER_CONFIG="$RUNNER_TEMP/docker-xiaogpt-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
-          docker version
-          docker info --format '{{json .SecurityOptions}}' | grep -q rootless
           mkdir -m 700 -p "$DOCKER_CONFIG"
           printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
       - name: Build on SG
@@ -62,6 +73,7 @@ jobs:
             "$IMAGE_TAG" /tests/tests/test_image.py
           docker run --rm --platform linux/amd64 --network none -e TZ=Asia/Shanghai "$IMAGE_TAG" --help
       - name: Publish image tags
+        if: env.PUBLISH_IMAGE == 'true'
         run: |
           set -euo pipefail
           docker push "$IMAGE_TAG"
@@ -77,7 +89,7 @@ jobs:
           printf '### SG build published\n\nRunner: %s\n\nCommit: %s\n\nImage: %s\n' \
             "$RUNNER_NAME" "$GITHUB_SHA" "$IMAGE_TAG" >> "$GITHUB_STEP_SUMMARY"
       - name: Clear temporary registry login
-        if: always()
+        if: always() && env.PUBLISH_IMAGE == 'true'
         run: |
           DOCKER_CONFIG="$RUNNER_TEMP/docker-xiaogpt-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           export DOCKER_CONFIG
