@@ -22,7 +22,6 @@ jobs:
     runs-on: [self-hosted, Linux, X64, aliyun-sg-t5]
     timeout-minutes: 30
     env:
-      DOCKER_CONFIG: ${{ runner.temp }}/docker-xiaogpt-${{ github.run_id }}-${{ github.run_attempt }}
       DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -37,6 +36,8 @@ jobs:
           test "$(uname -m)" = x86_64
           test -n "$DOCKERHUB_USERNAME"
           test -n "$DOCKERHUB_TOKEN"
+          export DOCKER_CONFIG="$RUNNER_TEMP/docker-xiaogpt-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
           docker version
           docker info --format '{{json .SecurityOptions}}' | grep -q rootless
           mkdir -m 700 -p "$DOCKER_CONFIG"
@@ -78,6 +79,8 @@ jobs:
       - name: Clear temporary registry login
         if: always()
         run: |
+          DOCKER_CONFIG="$RUNNER_TEMP/docker-xiaogpt-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          export DOCKER_CONFIG
           if test -d "$DOCKER_CONFIG"; then
             docker logout >/dev/null 2>&1 || true
             rm -f "$DOCKER_CONFIG/config.json"
