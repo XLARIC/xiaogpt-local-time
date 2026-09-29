@@ -1,0 +1,59 @@
+# Set TZ to the speaker's location, independently of the NAS/AI provider.
+x-xiaogpt: &xiaogpt
+  image: ${XIAOGPT_IMAGE:-alaricx/xiaogpt-local-time:0.1.0}
+  platform: linux/amd64
+  pull_policy: missing
+  restart: unless-stopped
+  init: true
+  network_mode: host
+  environment:
+    TZ: ${TZ:?Set the speaker timezone in .env, for example Pacific/Auckland}
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  xiaogpt-1:
+    <<: *xiaogpt
+    volumes:
+      - type: bind
+        source: ./speaker1/config.yaml
+        target: /config/config.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./speaker1/data
+        target: /root
+        bind:
+          create_host_path: false
+  xiaogpt-2:
+    <<: *xiaogpt
+    volumes:
+      - type: bind
+        source: ./speaker2/config.yaml
+        target: /config/config.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./speaker2/data
+        target: /root
+        bind:
+          create_host_path: false
+  xiaogpt-3:
+    <<: *xiaogpt
+    volumes:
+      - type: bind
+        source: ./speaker3/config.yaml
+        target: /config/config.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./speaker3/data
+        target: /root
+        bind:
+          create_host_path: false

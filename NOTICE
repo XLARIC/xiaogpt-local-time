@@ -1,0 +1,6 @@
+XiaoGPT Local Time extends XiaoGPT: https://github.com/yihong0618/xiaogpt.
+The upstream XiaoGPT source in the base image is licensed under MIT:
+Copyright (c) 2023 yihong. The original license remains at /app/LICENSE.
+See THIRD_PARTY_LICENSES.md for the full upstream MIT notice.
+Other packages in the base image retain their respective licenses.
+This community project is not affiliated with Xiaomi or Google.

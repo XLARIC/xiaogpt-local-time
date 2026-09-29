@@ -1,0 +1,12 @@
+**/.mi.token
+**/config.yaml
+**/data/*
+!**/data/.gitkeep
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+*.tar
+*.tar.gz
+.DS_Store

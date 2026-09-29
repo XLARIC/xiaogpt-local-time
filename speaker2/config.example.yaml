@@ -1,0 +1,31 @@
+hardware: LX06
+mi_did: "REPLACE_WITH_YOUR_DEVICE_DID"
+account: ""
+password: ""
+cookie: ""
+
+bot: gemini
+gemini_key: "REPLACE_WITH_YOUR_GEMINI_API_KEY"
+gemini_model: "gemini-2.5-flash-lite"
+
+tts: mi
+use_command: false
+mute_xiaoai: false
+stream: true
+verbose: false
+proxy: ""
+
+keyword:
+  - "请"
+  - "帮我"
+  - "问一下"
+  - "我想问"
+
+start_conversation: "开始持续对话"
+end_conversation: "结束持续对话"
+
+prompt: |
+  你是家庭智能语音助手。
+  时间、日期和星期由本地时区功能回答，其他问题由你回答。
+  默认使用简体中文回答，回答自然、简洁，适合音箱朗读。
+  通常不超过100字；不要编造实时信息。

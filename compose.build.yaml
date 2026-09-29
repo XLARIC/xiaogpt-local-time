@@ -1,0 +1,7 @@
+services:
+  xiaogpt-1:
+    build: .
+  xiaogpt-2:
+    build: .
+  xiaogpt-3:
+    build: .

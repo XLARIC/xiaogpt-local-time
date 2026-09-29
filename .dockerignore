@@ -1,0 +1,8 @@
+# Only required build files are allowed; private configuration stays outside.
+**
+!Dockerfile
+!local_time.py
+!patch_local_time.py
+!LICENSE
+!NOTICE
+!THIRD_PARTY_LICENSES.md
